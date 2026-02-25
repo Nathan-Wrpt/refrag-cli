@@ -24,8 +24,6 @@ The `refrag` command is now available inside the virtual environment.
 pip install -e .
 ```
 
-Run this without activating the venv. pip will place `refrag` in your system Python's scripts folder, which is already on your PATH.
-
 **Option B — in a venv, then added to PATH permanently:**
 ```bash
 python -m venv .venv
