@@ -77,6 +77,8 @@ pyinstaller --onefile --console --name refrag-launcher --add-data ".env;." --run
 
 The executable will be located in the `dist` folder. You can then copy it and place it wherever you want on your PC. It will have the same behaviour as running the script from the terminal, launching a refrag server with the defaults parameters (de_dust2, nadr mod), copying the IP to your clipboard. 
 Make sure to create the `.env` file with your creds before creating the executable.
+> [!WARNING]
+> The .env is baked into the .exe file, do not share it!
 
 ## Notes
 
