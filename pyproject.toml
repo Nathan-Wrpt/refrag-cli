@@ -10,6 +10,7 @@ dependencies = [
     "requests",
     "websockets",
     "python-dotenv",
+    "pyinstaller>=6.19.0",
 ]
 
 [project.scripts]

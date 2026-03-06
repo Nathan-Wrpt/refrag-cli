@@ -68,6 +68,16 @@ refrag --map inferno --mod nadr
 refrag --map de_mirage --mod retakes
 ```
 
+## From .exe file
+You can now build an executable using PyInstaller:
+
+```bash
+pyinstaller --onefile --console --name refrag-launcher --add-data ".env;." --runtime-hook hook.py launch_refrag.py
+```
+
+The executable will be located in the `dist` folder. You can then copy it and place it wherever you want on your PC. It will have the same behaviour as running the script from the terminal, launching a refrag server with the defaults parameters (de_dust2, nadr mod), copying the IP to your clipboard. 
+Make sure to create the `.env` file with your creds before creating the executable.
+
 ## Notes
 
 - The connect string (e.g. `connect 1.2.3.4:27015; password abc`) is automatically copied to your clipboard when the server is ready. Paste it directly into your CS2 console.
