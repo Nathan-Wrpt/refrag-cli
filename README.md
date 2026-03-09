@@ -55,8 +55,12 @@ Create a `.env` file at the root of the project:
 ```
 MAIL=your@email.com
 PASSWORD=yourpassword
+TEAM_ID="your_team_id"
+LOCATION_ID=27
 ```
+You can find your `TEAM_ID` in the URL of you Refrag dashboard, e.g https://play.refrag.gg/dashboard/team/<TEAM_ID>
 
+`LOCATION_ID` may need to be adjusted. 27 is paris, I do not know the other codes, unfortunately.
 ## Usage
 
 ```bash
@@ -83,4 +87,3 @@ Make sure to create the `.env` file with your creds before creating the executab
 ## Notes
 
 - The connect string (e.g. `connect 1.2.3.4:27015; password abc`) is automatically copied to your clipboard when the server is ready. Paste it directly into your CS2 console.
-- `TEAM_ID` and `LOCATION_ID` in `launch_refrag.py` may need to be adjusted to match your Refrag account. (LOCATION_ID is defaulted to 27 (Paris)).

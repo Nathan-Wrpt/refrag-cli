@@ -12,8 +12,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BASE_URL = "https://api-k8s.refrag.gg"
-TEAM_ID = "95115"
-LOCATION_ID = 27
 
 COMMON_HEADERS = {
     "accept": "application/json, text/plain, */*",
