@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 import sys
+from urllib.parse import urlencode
 
 import requests
 import websockets
@@ -12,6 +13,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BASE_URL = "https://api-k8s.refrag.gg"
+TEAM_ID = os.getenv("TEAM_ID", "").strip().strip('"')
+LOCATION_ID = int(os.getenv("LOCATION_ID", "27").strip().strip('"'))
+
+if not TEAM_ID:
+    print("[ERROR] TEAM_ID must be set in the .env file.")
+    sys.exit(1)
 
 COMMON_HEADERS = {
     "accept": "application/json, text/plain, */*",
@@ -58,16 +65,14 @@ def sign_in(email: str, password: str) -> dict:
 
 async def wait_for_server_ws(auth_headers: dict, server_id: int, timeout: int = 300) -> dict:
     """Listen on the ActionCable WebSocket and return server data once it is fully started."""
-    url = "wss://api-k8s.refrag.gg/cable"
-    ws_headers = {
-        "Origin": "https://play.refrag.gg",
-        "access-token": auth_headers.get("access-token", ""),
-        "client": auth_headers.get("client", ""),
+    # The cable now authenticates via query params instead of headers
+    query = urlencode({
+        "token": auth_headers.get("access-token", ""),
+        "client_id": auth_headers.get("client", ""),
         "uid": auth_headers.get("uid", ""),
-        "token-type": auth_headers.get("token-type", "Bearer"),
-        "expiry": auth_headers.get("expiry", ""),
-        "authorization": auth_headers.get("authorization", ""),
-    }
+    })
+    url = f"wss://api-k8s.refrag.gg/cable?{query}"
+    ws_headers = {"Origin": "https://play.refrag.gg"}
     identifier = json.dumps({"channel": "CsServerChannel", "team_id": int(TEAM_ID)})
 
     dots = 0
@@ -79,8 +84,11 @@ async def wait_for_server_ws(auth_headers: dict, server_id: int, timeout: int = 
     ) as ws:
         # Wait for welcome handshake
         raw = await asyncio.wait_for(ws.recv(), timeout=30)
-        if json.loads(raw).get("type") == "welcome":
-            await ws.send(json.dumps({"command": "subscribe", "identifier": identifier}))
+        msg = json.loads(raw)
+        if msg.get("type") != "welcome":
+            print(f"[ERROR] WebSocket rejected: {raw}")
+            sys.exit(1)
+        await ws.send(json.dumps({"command": "subscribe", "identifier": identifier}))
 
         deadline = asyncio.get_event_loop().time() + timeout
         while asyncio.get_event_loop().time() < deadline:
@@ -104,9 +112,13 @@ async def wait_for_server_ws(auth_headers: dict, server_id: int, timeout: int = 
                 for server in servers:
                     if server.get("id") == server_id:
                         status = server.get("status", "")
-                        if status not in ("starting", "booting", "provisioning", ""):
+                        if status == "online":
                             print()  # newline after dots
                             return server
+                        elif status == "terminated":
+                            print()
+                            print("[ERROR] Server was terminated before becoming ready.")
+                            sys.exit(1)
                         else:
                             dots += 1
                             print(f"\r[INFO] Waiting for server to be ready{'.' * (dots % 4):<3}", end="", flush=True)
@@ -187,7 +199,7 @@ def main() -> None:
     map_name = args.map_name
     if not map_name.startswith("de_"):
         map_name = "de_" + map_name
-    asyncio.run(start_server(auth_headers, map_name=args.map_name, mod=args.mod))
+    asyncio.run(start_server(auth_headers, map_name=map_name, mod=args.mod))
 
 
 if __name__ == "__main__":

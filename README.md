@@ -1,56 +1,26 @@
 # refrag-launcher
 
-A minimal CLI to launch and close [Refrag](https://play.refrag.gg) CS2 servers from your terminal — no browser needed.
+A minimal Windows CLI to launch [Refrag](https://play.refrag.gg) CS2 servers from a terminal. When the server is ready, it copies the connect command to the clipboard.
 
 ## Requirements
 
-- Python 3.11+
-- A Refrag account
+- Windows
+- Python 3.9 or newer (not required when using the prebuilt executable)
+- A Refrag account with permission to start servers
 
 ## Installation
 
-```bash
-git clone https://github.com/your-username/refrag-launcher.git
-cd refrag-launcher
-```
+Clone the project, then from its directory run these commands in PowerShell:
 
-The `refrag` command is now available inside the virtual environment.
-
-### Make `refrag` available everywhere (outside the venv)
-
-**Option A — install with your system Python (simplest):**
-
-```bash
-pip install -e .
-```
-
-**Option B — in a venv, then added to PATH permanently:**
-```bash
-python -m venv .venv
-
-.venv\Scripts\activate        # Windows
-# source .venv/bin/activate   # macOS / Linux
-
-pip install -e .
-```
-
-
-On **Windows** (PowerShell, run once):
 ```powershell
-$p = "$PWD\.venv\Scripts"
-[Environment]::SetEnvironmentVariable("PATH", "$([Environment]::GetEnvironmentVariable('PATH','User'));$p", "User")
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e .
 ```
-
-On **macOS / Linux** (add to `~/.bashrc` or `~/.zshrc`):
-```bash
-export PATH="$PATH:/path/to/refrag-launcher/.venv/bin"
-```
-
-Then open a new terminal — `refrag` will work from anywhere.
 
 ## Configuration
 
-Create a `.env` file at the root of the project:
+Create a `.env` file at the root of the project (next to `launch_refrag.py`):
 
 ```
 MAIL=your@email.com
@@ -58,32 +28,35 @@ PASSWORD=yourpassword
 TEAM_ID="your_team_id"
 LOCATION_ID=27
 ```
-You can find your `TEAM_ID` in the URL of you Refrag dashboard, e.g https://play.refrag.gg/dashboard/team/<TEAM_ID>
+Find `TEAM_ID` in your Refrag dashboard URL, for example `https://play.refrag.gg/dashboard/team/12345`.
 
-`LOCATION_ID` may need to be adjusted. 27 is paris, I do not know the other codes, unfortunately.
+`LOCATION_ID` defaults to `27` (Paris). Change it if you use another server location.
 ## Usage
 
 ```bash
 # Start a server (defaults: de_dust2, nadr mod)
 refrag
 
-# Start with a specific map and mod (no need to write de_ for maps)
+# Start with a specific map and mod
 refrag --map inferno --mod nadr
 refrag --map de_mirage --mod retakes
 ```
 
-## From .exe file
-You can now build an executable using PyInstaller:
+Map names can be given with or without the `de_` prefix. The defaults are `de_dust2` and `nadr`.
 
-```bash
-pyinstaller --onefile --console --name refrag-launcher --add-data ".env;." --runtime-hook hook.py launch_refrag.py
+## Build the Windows executable
+
+Create the `.env` file before building. From PowerShell, run:
+
+```powershell
+python -m PyInstaller --onefile --console --name launch_refrag --add-data ".env;." --runtime-hook hook.py launch_refrag.py
 ```
 
-The executable will be located in the `dist` folder. You can then copy it and place it wherever you want on your PC. It will have the same behaviour as running the script from the terminal, launching a refrag server with the defaults parameters (de_dust2, nadr mod), copying the IP to your clipboard. 
-Make sure to create the `.env` file with your creds before creating the executable.
+The executable will be created at `dist\launch_refrag.exe`. It uses the `.env` values that were present when it was built; rebuild it if you change those values.
+
 > [!WARNING]
-> The .env is baked into the .exe file, do not share it!
+> The `.env` file, including your credentials, is bundled into the executable. Do not share the executable.
 
 ## Notes
 
-- The connect string (e.g. `connect 1.2.3.4:27015; password abc`) is automatically copied to your clipboard when the server is ready. Paste it directly into your CS2 console.
+- Paste the copied connect command (for example, `connect 1.2.3.4:27015; password abc`) into your CS2 console.
